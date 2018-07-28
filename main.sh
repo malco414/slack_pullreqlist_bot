@@ -1,13 +1,12 @@
 #!/bin/bash
-
 #-----------------------------------------------
 # VARIABLES
 #-----------------------------------------------
 SCRIPT_DIR=$(cd $(dirname $(readlink -f $0 || echo $0));pwd -P)
-source ./variables.txt
+source ${SCRIPT_DIR}/variables.txt
 SLACK_BOT_NAME="プルリク通知くん"
 SLACK_CHANNEL="#pullreq_bot"
-TMP=./tmp.txt
+TMP=${SCRIPT_DIR}/tmp.txt
 #-----------------------------------------------
 # MAIN
 #-----------------------------------------------
