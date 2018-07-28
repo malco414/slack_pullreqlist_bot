@@ -5,19 +5,27 @@
 #-----------------------------------------------
 SCRIPT_DIR=$(cd $(dirname $(readlink -f $0 || echo $0));pwd -P)
 source ./variables.txt
-SLACK_BOT_NAME="プルリクくん"
+SLACK_BOT_NAME="プルリク通知くん"
 SLACK_CHANNEL="#pullreq_bot"
+TMP=./tmp.txt
 #-----------------------------------------------
 # MAIN
 #-----------------------------------------------
 
-### GET REPO LIST
-#for l in `curl -s -H "Authorization: token ${TOKEN}" https://api.github.com/users/malco414/repos?per_page=100 | \
-# jq .[].pulls_url -r | cut -d'{' -f1`; do echo $l ; curl -s  -H "Authorization: token ${TOKEN}" $l | jq .[].title; done
+### CREATE TMP FILE
+touch ${TMP}
 
-### GET PR LIST
+### GET LIST
+for l in `curl -s -H "Authorization: token ${TOKEN}" \
+  https://api.github.com/users/malco414/repos?per_page=100 \
+  | jq .[].pulls_url -r | cut -d'{' -f1`;
+  do
+    curl -s -H "Authorization: token ${TOKEN}" $l \
+    | jq -r '.[] | .title, .html_url' >> ${TMP}
+  done
 
+### POST
+curl -X POST --data-urlencode "payload={\"channel\": \"${SLACK_CHANNEL}\", \"username\": \"${SLACK_BOT_NAME}\", \"text\": \"`cat ${TMP}`\", \"icon_emoji\": \":bug:\"}" ${WEBHOOKURL} >/dev/null 2>&1
 
- ### POST
-curl -X POST --data-urlencode "payload={\"channel\": \"${SLACK_CHANNEL}\", \"username\": \"${SLACK_BOT_NAME}\", \"text\": \"テスト\", \"icon_emoji\": \":bug:\"}" ${WEBHOOKURL}
-
+### REMOVE TMP FILE
+rm -f  ${TMP} >/dev/null 2>&1
