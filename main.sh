@@ -14,6 +14,8 @@ TMP=./tmp.txt
 
 ### CREATE TMP FILE
 touch ${TMP}
+echo "プルリク一覧を確認しましょう。" >>${TMP}
+echo "----" >> ${TMP}
 
 ### GET LIST
 for l in `curl -s -H "Authorization: token ${TOKEN}" \
@@ -21,7 +23,7 @@ for l in `curl -s -H "Authorization: token ${TOKEN}" \
   | jq .[].pulls_url -r | cut -d'{' -f1`;
   do
     curl -s -H "Authorization: token ${TOKEN}" $l \
-    | jq -r '.[] | .title, .html_url' >> ${TMP}
+    | jq -r '.[] | .head.repo.name, .title, .html_url' >> ${TMP}
   done
 
 ### POST
